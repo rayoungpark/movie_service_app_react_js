@@ -1,38 +1,40 @@
-import Button from "./Button";
-import styles from "./App.module.css";
-import { useEffect, useState } from "react";
+import { useRef, useState } from "react";
 
-function TestNode() {
-  useEffect(() => {
-    console.log("create :)");
-    return () => {
-      // component가 사라질 때 실행됨
-      console.log("destroyed :<");
-    };
-  }, []);
-
-  return <h1>TEST</h1>;
-}
 function App() {
-  const [counter, setCounter] = useState(0);
-  const [keyword, setKeyword] = useState("");
-  const [show, setShow] = useState(false);
-
-  // const hanldeClick = () => setCounter((cur) => cur + 1);
-  const hanldeClick = () => setShow((cur) => !cur);
-  const hanldeInput = (e) => setKeyword(e.target.value);
-
-  useEffect(() => console.log("only one"), []);
-  useEffect(() => {
-    if (keyword && keyword.length > 5) console.log(keyword);
-  }, [keyword]);
-
+  const [toDo, setToDo] = useState("");
+  const [toDos, setToDos] = useState([]);
+  const toDoListRef = useRef();
+  const onChange = (e) => setToDo(e.target.value);
+  const onSubmit = (e) => e.preventDefault();
+  const onClick = () => {
+    const value = toDo.trimStart();
+    if (value === "") return;
+    setToDos((curArr) => [toDo, ...curArr]);
+    setToDo("");
+  };
   return (
     <div>
-      {show && <TestNode />}
-      <input type={"text"} placeholder="Search here..." value={keyword} onChange={hanldeInput} />
-      <p>{counter}</p>
-      <Button onClick={hanldeClick} text={"Button"} />
+      <h1>My To Dos ({toDos.length})</h1>
+      <form onSubmit={onSubmit}>
+        <input onChange={onChange} value={toDo} type="text" placeholder="Write your todo ..." />
+        <button onClick={onClick}>Add To Do</button>
+      </form>
+      <hr />
+      <ul
+        ref={toDoListRef}
+        onClick={(e) => {
+          if (e.target.nodeName === "LI") {
+            const idx = [...toDoListRef.current.childNodes].findIndex((v) => v === e.target);
+            const arr = [...toDos];
+            arr.splice(idx, 1);
+            setToDos(arr);
+          }
+        }}
+      >
+        {toDos.map((value, i) => (
+          <li key={i}>{value}</li>
+        ))}
+      </ul>
     </div>
   );
 }
