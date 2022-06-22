@@ -1,40 +1,54 @@
-import { useRef, useState } from "react";
+import { useEffect, useState } from "react";
 
 function App() {
-  const [toDo, setToDo] = useState("");
-  const [toDos, setToDos] = useState([]);
-  const toDoListRef = useRef();
-  const onChange = (e) => setToDo(e.target.value);
-  const onSubmit = (e) => e.preventDefault();
-  const onClick = () => {
-    const value = toDo.trimStart();
-    if (value === "") return;
-    setToDos((curArr) => [toDo, ...curArr]);
-    setToDo("");
-  };
+  const [loading, setLoading] = useState(true);
+  const [coins, setCoins] = useState([]);
+  const [curCoin, setCurCoin] = useState(null);
+  const [money, setMoney] = useState("");
+  useEffect(() => {
+    fetch("https://api.coinpaprika.com/v1/tickers")
+      .then((response) => response.json())
+      .then((json) => {
+        setCoins(json);
+        setCurCoin(json[0]);
+        setLoading(false);
+      });
+
+    return () => {};
+  }, []);
+
   return (
     <div>
-      <h1>My To Dos ({toDos.length})</h1>
-      <form onSubmit={onSubmit}>
-        <input onChange={onChange} value={toDo} type="text" placeholder="Write your todo ..." />
-        <button onClick={onClick}>Add To Do</button>
-      </form>
-      <hr />
-      <ul
-        ref={toDoListRef}
-        onClick={(e) => {
-          if (e.target.nodeName === "LI") {
-            const idx = [...toDoListRef.current.childNodes].findIndex((v) => v === e.target);
-            const arr = [...toDos];
-            arr.splice(idx, 1);
-            setToDos(arr);
-          }
-        }}
-      >
-        {toDos.map((value, i) => (
-          <li key={i}>{value}</li>
-        ))}
-      </ul>
+      <h1>The Coins! ({coins.length})</h1>
+      {loading ? (
+        <strong>Loading...</strong>
+      ) : (
+        <>
+          <select
+            onChange={function (e) {
+              const selectedIndex = e.target.selectedIndex;
+              setCurCoin(coins[selectedIndex]);
+            }}
+          >
+            {coins.map((coin, index) => {
+              if (index > 100) return false;
+
+              return (
+                <option key={coin.id}>
+                  {coin.name} ({coin.symbol}) : ${coin.quotes.USD.price} USD
+                </option>
+              );
+            })}
+          </select>
+          <hr />
+          <label about="hasMoney">Money </label>
+          <input value={money} name="hasMoney" onChange={(e) => setMoney(e.target.value)} />
+          USD
+          <p>
+            You can buy {Math.floor(money / curCoin.quotes.USD.price)} {curCoin.symbol}s
+          </p>
+        </>
+      )}
     </div>
   );
 }
