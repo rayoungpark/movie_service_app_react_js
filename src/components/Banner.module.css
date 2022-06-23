@@ -1,0 +1,12 @@
+.banner {
+  text-align: center;
+  padding: 3px 9px;
+  margin-right: 1rem;
+  font-size: 13px;
+  font-weight: bold;
+  border-radius: 10px;
+  color: black;
+  background: white;
+  
+  /* box-shadow: #cacaca 1px 1px 3px 0px; */
+}

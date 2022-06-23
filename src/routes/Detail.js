@@ -1,6 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
-import Movie from "../components/Moive";
+import ColorThief from "colorthief";
+import Banner from "../components/Banner";
+import styles from "./Detail.module.css";
 
 export default function Detail() {
   const { id } = useParams();
@@ -8,60 +10,103 @@ export default function Detail() {
   const [data, setData] = useState({});
   const [loading, setLoading] = useState(true);
 
-  const baseUrl = "https://yts.mx/api/v2/movie_details.json?movie_id=";
+  const baseUrl = "https://yts.mx/api/v2/movie_details.json?with_images=true&with_cast=true&movie_id=";
+
+  const getColor = () => {
+    const colorThief = new ColorThief();
+    const $img = new Image();
+    $img.addEventListener("load", function () {
+      const result = colorThief.getColor($img);
+      document.documentElement.style.setProperty("--color-background", `rgb(${result.join(",")})`);
+    });
+    let imageURL = data.background_image_original;
+    let googleProxyURL = "https://images1-focus-opensocial.googleusercontent.com/gadgets/proxy?container=focus&refresh=2592000&url=";
+
+    $img.crossOrigin = "Anonymous";
+    $img.src = googleProxyURL + encodeURIComponent(imageURL);
+  };
 
   const getMovie = async () => {
     const response = await fetch(baseUrl + id);
     const json = await response.json();
     setData(json.data.movie);
+    console.log(json.data);
     setLoading(false);
-    console.log(json.data.movie);
   };
 
   useEffect(() => {
     getMovie();
   }, []);
 
-  return (
-    <div style={{ minHeight: "100vh" }}>
-      {loading ? (
-        <h1>Loading...</h1>
-      ) : (
-        <div
-          style={{
-            position: "relative",
-            color: "white",
-            width: "100%",
-            // height: "100%",
-            boxSizing: "border-box",
-            padding: "2rem",
-            backgroundImage: `url(${data.background_image_original})`,
-            backgroundRepeat: "no-repeat",
-            backgroundSize: "contain",
-          }}
-        >
-          <div style={{ position: "absolute" }}></div>
+  useEffect(() => {
+    if (!loading) {
+      getColor();
+    }
+  }, [loading]);
 
-          <h1 style={{ color: "white" }}>{data.title_long}</h1>
-          <img src={data.large_cover_image} alt={data.title} />
-          <h3>Rating</h3>
-          <p>{data.rating}</p>
-          <h3>Runtime</h3>
-          <p>{data.runtime}</p>
-          <h3>Description</h3>
-          <p>{data.description_full}</p>
-          <h3>Genres</h3>
-          <div>
-            {data.genres.map((g) => (
-              <span key={g} style={{ display: "inline-block", padding: "5px 10px", borderRadius: "3px", marginRight: "5px", background: "#ffffff55" }}>
-                #{g}
-              </span>
-            ))}
+  return (
+    <div className={styles.container}>
+      {loading ? null : (
+        <>
+          <div className={styles.content_top}>
+            <div className={styles.content_top__visual} style={{ backgroundImage: `url(${data.background_image_original})` }}>
+              {/* <img src={data.background_image_original} alt={data.title} ref={imgRef} /> */}
+            </div>
           </div>
-          {/* <img src={data.background_image_original} alt="background" /> */}
-          {/* <a href={data.url}>more detail</a> */}
-        </div>
-        //  <Movie coverImage={data.large_cover_image} genres={data.genres} title={data.title} />
+
+          <div className={styles.content_body}>
+            <div className={styles.content_body__wrapper}>
+              <h1 className={styles.title}>{data.title}</h1>
+              <p className={styles.title_en}>{data.title_english}</p>
+              <div className={styles.movie_info}>
+                <img src={data.large_cover_image} alt={data.title} />
+                <div className={styles.movie_spec}>
+                  <p className={styles.description}>{data.description_full}</p>
+                  <ul className={styles.info}>
+                    <li>
+                      <span className={styles.screen_out}>rating</span>⭐ {data.rating}
+                    </li>
+                    <li>
+                      <span className={styles.screen_out}>year</span>
+                      {data.year}
+                    </li>
+                    <li>
+                      <span className={styles.screen_out}>language</span>
+                      {data.language.toUpperCase()}
+                    </li>
+                    <li>
+                      <span className={styles.screen_out}>runtime</span>
+                      {data.runtime}
+                    </li>
+                  </ul>
+
+                  <div>
+                    {data.cast?.map((c) => {
+                      return (
+                        <div>
+                          <img src={c.url_small_image} alt={c.name} />
+                          <p>{c.character_name}</p>
+                          <p>{c.name}</p>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <ul>
+                    {data.genres.map((g) => (
+                      <Banner key={g} text={g} />
+                    ))}
+                  </ul>
+                </div>
+              </div>
+
+              <div>
+                <img src={data.large_screenshot_image1} alt="screenshot1" />
+                <img src={data.large_screenshot_image2} alt="screenshot1" />
+                <img src={data.large_screenshot_image3} alt="screenshot1" />
+              </div>
+            </div>
+          </div>
+        </>
       )}
     </div>
   );
