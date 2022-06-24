@@ -1,12 +1,18 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import ColorThief from "colorthief";
 import Banner from "../components/Banner";
 import styles from "./Detail.module.css";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Navigation, Autoplay, Pagination } from "swiper";
+
+// Import Swiper styles
+import "swiper/css";
+import "swiper/css/pagination";
+import "swiper/css/navigation";
 
 export default function Detail() {
   const { id } = useParams();
-
   const [data, setData] = useState({});
   const [loading, setLoading] = useState(true);
 
@@ -80,13 +86,14 @@ export default function Detail() {
                     </li>
                   </ul>
 
-                  <div>
+                  {/* <h3>cast</h3> */}
+                  <div className={styles.cast_container}>
                     {data.cast?.map((c) => {
                       return (
-                        <div>
+                        <div key={c.name}>
                           <img src={c.url_small_image} alt={c.name} />
-                          <p>{c.character_name}</p>
-                          <p>{c.name}</p>
+                          <p className={styles.c_name}>{c.character_name}</p>
+                          <p className={styles.name}>{c.name}</p>
                         </div>
                       );
                     })}
@@ -99,11 +106,31 @@ export default function Detail() {
                 </div>
               </div>
 
-              <div>
-                <img src={data.large_screenshot_image1} alt="screenshot1" />
-                <img src={data.large_screenshot_image2} alt="screenshot1" />
-                <img src={data.large_screenshot_image3} alt="screenshot1" />
-              </div>
+              <Swiper
+                className={styles.swiper_wrapper}
+                style={{
+                  "--swiper-navigation-color": "#fff",
+                  "--swiper-pagination-color": "#fff",
+                  "--swiper-pagination-bullet-width": "10px",
+                  "--swiper-pagination-bullet-height": "10px",
+                }}
+                autoplay={{ delay: 3000, disableOnInteraction: false }}
+                loop={true}
+                spaceBetween={10}
+                navigation={true}
+                pagination={{ clickable: true }}
+                modules={[Navigation, Pagination, Autoplay]}
+              >
+                <SwiperSlide className={styles.swiper}>
+                  <img src={data.large_screenshot_image1} alt="screenshot1" />
+                </SwiperSlide>
+                <SwiperSlide className={styles.swiper}>
+                  <img src={data.large_screenshot_image2} alt="screenshot2" />
+                </SwiperSlide>
+                <SwiperSlide className={styles.swiper}>
+                  <img src={data.large_screenshot_image3} alt="screenshot3" />
+                </SwiperSlide>
+              </Swiper>
             </div>
           </div>
         </>
