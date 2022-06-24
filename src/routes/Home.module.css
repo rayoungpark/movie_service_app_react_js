@@ -14,3 +14,18 @@
     padding: 50px 40px 100px;
     margin: 0 auto;
 }
+
+.rating_wrapper {
+    text-align: end;
+  font-size: 2rem;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 1rem 3rem;
+
+}
+
+.rating_wrapper select {
+    font-size: 1.5rem;
+  padding: 0.5rem;
+  margin-left: 1rem;
+}

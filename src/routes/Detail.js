@@ -36,7 +36,6 @@ export default function Detail() {
     const response = await fetch(baseUrl + id);
     const json = await response.json();
     setData(json.data.movie);
-    console.log(json.data);
     setLoading(false);
   };
 
